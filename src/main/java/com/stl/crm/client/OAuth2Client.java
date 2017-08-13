@@ -3,6 +3,8 @@ package com.stl.crm.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 
@@ -23,16 +25,11 @@ public class OAuth2Client {
 		oauth2RestTemplate = restTemplate();
 		
 		getCustomers();
-		
 //		getCustomer(3L);
-		
 //		createCustomer();
-		
 //		updateCustomer();
-		
 //		deleteCustomer(9L);
-		
-//		getCustomerEntity(3L);
+//		getCustomerEntity(8L);
 		
 	}
 	
@@ -74,9 +71,9 @@ public class OAuth2Client {
 		customer.setPhone("101-202-3033");
 		customer.setContact("CIO");
 
-		Customer savedCostomer = oauth2RestTemplate.postForObject(CRM_OAUTH2_URI, customer, Customer.class);
+		Customer savedCustomer = oauth2RestTemplate.postForObject(CRM_OAUTH2_URI, customer, Customer.class);
 		
-		System.out.println("savedCostomer: " + savedCostomer);
+		System.out.println("savedCostomer: " + savedCustomer);
 	}
 	
 	/**
@@ -90,8 +87,8 @@ public class OAuth2Client {
 		
 		oauth2RestTemplate.put(CRM_OAUTH2_URI + "/{customerId}", customer, customer.getId());
 		
-		Customer updatedCostomer = getCustomer(4L);
-		System.out.println("updatedCostomer: " + updatedCostomer);
+		Customer updatedCustomer = getCustomer(4L);
+		System.out.println("updatedCostomer: " + updatedCustomer);
 		
 	}
 	
@@ -104,31 +101,55 @@ public class OAuth2Client {
 	private void deleteCustomer(Long customerId) {
 		oauth2RestTemplate.delete(CRM_OAUTH2_URI + "/{customerId}", customerId);
 	}
+
+	/**
+	 * 
+	 * get a particular Customer using getForEntity
+	 * @param customerId
+	 * @return
+	 */
+	private Customer getCustomerEntity(Long customerId) {
+		ResponseEntity entity = oauth2RestTemplate.getForEntity(CRM_OAUTH2_URI + "/{customerId}", Customer.class, customerId);
+		Customer customer = (Customer) entity.getBody();
+		System.out.println("customer: " + customer);
+
+		//-- getting response header info 
+		HttpHeaders responseHeaders = entity.getHeaders();
+		responseHeaders.entrySet().forEach(header-> {
+			System.out.println(header.getKey() + ":" + header.getValue());
+		});
+
+		//-- getting response status info
+		System.out.println("status name: " + entity.getStatusCode().name());
+		System.out.println("status value: " + entity.getStatusCode().value());
 		
+		return customer;
+	}
+	
 	/**
 	 * 
 	 * OAuth2 Rest template
 	 * @return
 	 */
 	private OAuth2RestTemplate restTemplate() {
+		System.out.println("getting OAuth2RestTemplate ...");
+
 		ResourceOwnerPasswordResourceDetails resourceDetails = new ResourceOwnerPasswordResourceDetails();
 		resourceDetails.setGrantType("password");
 		resourceDetails.setAccessTokenUri("http://localhost:8080/crm-oauth2/oauth/token");
-		
-		System.out.println("getting OAuth2RestTemplate ...");
-		
+	
 		//-- set the clients info
 		resourceDetails.setClientId("crmClient1");
 		resourceDetails.setClientSecret("crmSuperSecret");
 		
-		// Set scopes
+		// set scopes
 		List<String> scopes = new ArrayList<>();
 		scopes.add("read"); 
 		scopes.add("write");
 		scopes.add("trust");
 		resourceDetails.setScope(scopes);
 		
-		//-- Resource Owner info
+		//-- set Resource Owner info
 		resourceDetails.setUsername("crmadmin");
 		resourceDetails.setPassword("adminpass");
 		

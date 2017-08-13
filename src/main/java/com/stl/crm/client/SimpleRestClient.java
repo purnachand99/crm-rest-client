@@ -17,18 +17,32 @@ public class SimpleRestClient {
 	
 	
 	public void runRestClient() {
-		getCustomers();		
-		
+
+		createCustomer();
+//		getCustomers();		
 //		getCustomer(3L);
-		
-//		createCustomer();
-		
 //		updateCustomer();
-		
 //		deleteCustomer(4L);
-		
 		getCustomerEntity(3L);
 		
+	}
+
+	/**
+	 * 
+	 * add a new Customer
+	 * 
+	 */
+	private void createCustomer() {
+		Customer customer = new Customer();
+		
+		customer.setName("Dell Inc");
+		customer.setAddress("101 Dell way");
+		customer.setPhone("101-202-3033");
+		customer.setContact("CIO");
+
+		Customer savedCustomer = restTemplate.postForObject(CRM_JPA_URI, customer, Customer.class);
+		
+		System.out.println("savedCustomer: " + savedCustomer);
 	}
 	
 	/**
@@ -55,25 +69,7 @@ public class SimpleRestClient {
 		
 		return customer;
 	}
-	
-	/**
-	 * 
-	 * add a new Customer
-	 * 
-	 */
-	private void createCustomer() {
-		Customer customer = new Customer();
-		
-		customer.setName("Dell Inc");
-		customer.setAddress("101 Dell way");
-		customer.setPhone("101-202-3033");
-		customer.setContact("CIO");
 
-		Customer savedCostomer = restTemplate.postForObject(CRM_JPA_URI, customer, Customer.class);
-		
-		System.out.println("savedCostomer: " + savedCostomer);
-	}
-	
 	/**
 	 * 
 	 * update an existing Customer
@@ -85,8 +81,8 @@ public class SimpleRestClient {
 		
 		restTemplate.put(CRM_JPA_URI + "/{customerId}", customer, customer.getId());
 		
-		Customer updatedCostomer = getCustomer(4L);
-		System.out.println("updatedCostomer: " + updatedCostomer);
+		Customer updatedCustomer = getCustomer(4L);
+		System.out.println("updatedCustomer: " + updatedCustomer);
 		
 	}
 	
